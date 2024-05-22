@@ -12,19 +12,19 @@ import os
 load_dotenv()
 
 TEAM_NAME = os.getenv("TEAM_NAME")
-TEAM_TRACK = os.getenv("TEAM_TRACK")
-
+# TEAM_TRACK = os.getenv("TEAM_TRACK")
+TEAM_TRACK = "advanced"
 
 def main():
-    # input_dir = Path(f"/home/jupyter/{TEAM_TRACK}")
-    input_dir = Path(f"../../data/{TEAM_TRACK}/train")
-    # results_dir = Path(f"/home/jupyter/{TEAM_NAME}")
+    input_dir = Path(f"../{TEAM_TRACK}")
     results_dir = Path("results")
     results_dir.mkdir(parents=True, exist_ok=True)
     instances = []
-
+    
     with open(input_dir / "asr.jsonl", "r") as f:
-        for line in f:
+        lines = f.readlines()
+        print("BEGINNING AUDIO READ")
+        for line in lines[0:2]:
             if line.strip() == "":
                 continue
             instance = json.loads(line.strip())
@@ -33,7 +33,9 @@ def main():
                 instances.append(
                     {**instance, "b64": base64.b64encode(audio_bytes).decode("ascii")}
                 )
-
+    
+    print("END AUDIO READ")
+    
     results = run_batched(instances)
     df = pd.DataFrame(results)
     df.to_csv(results_dir / "asr_results.csv", index=False)
@@ -51,6 +53,7 @@ def run_batched(
     # split into batches
     results = []
     for index in tqdm(range(0, len(instances), batch_size)):
+        print(f"RUNNING BATCH {index}")
         _instances = instances[index : index + batch_size]
         response = requests.post(
             "http://localhost:5001/stt",
@@ -64,6 +67,7 @@ def run_batched(
             ),
         )
         _results = response.json()["predictions"]
+        print(_results)
         results.extend(
             [
                 {

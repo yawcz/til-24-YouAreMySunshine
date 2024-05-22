@@ -10,8 +10,8 @@ import os
 
 load_dotenv()
 
-TEAM_NAME = os.getenv("TEAM_NAME")
-TEAM_TRACK = os.getenv("TEAM_TRACK")
+TEAM_NAME = os.getenv("youaremysunshine")
+TEAM_TRACK = os.getenv("advanced")
 
 
 def main():
